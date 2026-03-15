@@ -4,6 +4,7 @@ import { parseArgs } from "node:util";
 import {
   checkProviderApiKey,
   createOrUpdateProvider,
+  getProviderBaseUrl,
 } from "../../providers/byok-providers";
 import { getErrorMessage } from "../../utils/error";
 import {
@@ -41,6 +42,7 @@ interface ConnectSubcommandDeps {
     accessKey?: string,
     region?: string,
     profile?: string,
+    baseUrl?: string,
   ) => Promise<void>;
   createOrUpdateProvider: (
     providerType: string,
@@ -49,6 +51,7 @@ interface ConnectSubcommandDeps {
     accessKey?: string,
     region?: string,
     profile?: string,
+    baseUrl?: string,
   ) => Promise<unknown>;
   isChatGPTOAuthConnected: () => Promise<boolean>;
   runChatGPTOAuthConnectFlow: (
@@ -229,6 +232,7 @@ export async function runConnectSubcommand(
     }
 
     try {
+      const providerBaseUrl = getProviderBaseUrl(provider.byokProvider);
       io.stdout("Validating AWS Bedrock credentials...");
       await io.checkProviderApiKey(
         provider.byokProvider.providerType,
@@ -236,6 +240,7 @@ export async function runConnectSubcommand(
         method === "iam" ? accessKey : undefined,
         region,
         method === "profile" ? profile : undefined,
+        providerBaseUrl,
       );
 
       io.stdout("Saving provider...");
@@ -246,6 +251,7 @@ export async function runConnectSubcommand(
         method === "iam" ? accessKey : undefined,
         region,
         method === "profile" ? profile : undefined,
+        providerBaseUrl,
       );
 
       io.stdout(
@@ -279,14 +285,26 @@ export async function runConnectSubcommand(
     }
 
     try {
+      const providerBaseUrl = getProviderBaseUrl(provider.byokProvider);
       io.stdout(`Validating ${provider.byokProvider.displayName} API key...`);
-      await io.checkProviderApiKey(provider.byokProvider.providerType, apiKey);
+      await io.checkProviderApiKey(
+        provider.byokProvider.providerType,
+        apiKey,
+        undefined,
+        undefined,
+        undefined,
+        providerBaseUrl,
+      );
 
       io.stdout("Saving provider...");
       await io.createOrUpdateProvider(
         provider.byokProvider.providerType,
         provider.byokProvider.providerName,
         apiKey,
+        undefined,
+        undefined,
+        undefined,
+        providerBaseUrl,
       );
 
       io.stdout(

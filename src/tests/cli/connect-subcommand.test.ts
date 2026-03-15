@@ -48,11 +48,44 @@ describe("connect subcommand", () => {
     expect(deps.checkProviderApiKey).toHaveBeenCalledWith(
       "anthropic",
       "sk-ant-123",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
     );
     expect(deps.createOrUpdateProvider).toHaveBeenCalledWith(
       "anthropic",
       "lc-anthropic",
       "sk-ant-123",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    );
+  });
+
+  test("connects zai using the coding endpoint base url", async () => {
+    const { deps } = createIoDeps();
+
+    const exitCode = await runConnectSubcommand(["zai", "zk-123"], deps);
+
+    expect(exitCode).toBe(0);
+    expect(deps.checkProviderApiKey).toHaveBeenCalledWith(
+      "zai",
+      "zk-123",
+      undefined,
+      undefined,
+      undefined,
+      "https://api.z.ai/api/coding/paas/v4/",
+    );
+    expect(deps.createOrUpdateProvider).toHaveBeenCalledWith(
+      "zai",
+      "lc-zai",
+      "zk-123",
+      undefined,
+      undefined,
+      undefined,
+      "https://api.z.ai/api/coding/paas/v4/",
     );
   });
 
@@ -77,6 +110,10 @@ describe("connect subcommand", () => {
     expect(deps.checkProviderApiKey).toHaveBeenCalledWith(
       "google_ai",
       "prompted-key",
+      undefined,
+      undefined,
+      undefined,
+      undefined,
     );
   });
 

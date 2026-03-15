@@ -6,6 +6,7 @@ import {
   type ByokProvider,
   checkProviderApiKey,
   createOrUpdateProvider,
+  getProviderBaseUrl,
   getConnectedProviders,
   type ProviderField,
   type ProviderResponse,
@@ -222,10 +223,15 @@ export function ProviderSelector({
     if (validationState === "valid") {
       setValidationState("saving");
       try {
+        const providerBaseUrl = getProviderBaseUrl(provider);
         await createOrUpdateProvider(
           provider.providerType,
           provider.providerName,
           apiKeyInput.trim(),
+          undefined,
+          undefined,
+          undefined,
+          providerBaseUrl,
         );
         // Refresh connected providers
         const providers = await getConnectedProviders();
@@ -251,7 +257,15 @@ export function ProviderSelector({
     setValidationError(null);
 
     try {
-      await checkProviderApiKey(provider.providerType, apiKeyInput.trim());
+      const providerBaseUrl = getProviderBaseUrl(provider);
+      await checkProviderApiKey(
+        provider.providerType,
+        apiKeyInput.trim(),
+        undefined,
+        undefined,
+        undefined,
+        providerBaseUrl,
+      );
       if (mountedRef.current) {
         setValidationState("valid");
       }
@@ -289,6 +303,7 @@ export function ProviderSelector({
     if (validationState === "valid") {
       setValidationState("saving");
       try {
+        const providerBaseUrl = getProviderBaseUrl(provider);
         await createOrUpdateProvider(
           provider.providerType,
           provider.providerName,
@@ -296,6 +311,7 @@ export function ProviderSelector({
           accessKey,
           region,
           profile,
+          providerBaseUrl,
         );
         // Refresh connected providers
         const providers = await getConnectedProviders();
@@ -321,12 +337,14 @@ export function ProviderSelector({
     setValidationError(null);
 
     try {
+      const providerBaseUrl = getProviderBaseUrl(provider);
       await checkProviderApiKey(
         provider.providerType,
         apiKey,
         accessKey,
         region,
         profile,
+        providerBaseUrl,
       );
       if (mountedRef.current) {
         setValidationState("valid");

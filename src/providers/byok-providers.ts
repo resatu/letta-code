@@ -23,6 +23,9 @@ export interface AuthMethod {
   fields: ProviderField[];
 }
 
+export const ZAI_CODING_API_BASE_URL =
+  "https://api.z.ai/api/coding/paas/v4/";
+
 // Provider configuration for the /connect UI
 export const BYOK_PROVIDERS = [
   {
@@ -53,6 +56,7 @@ export const BYOK_PROVIDERS = [
     description: "Connect a zAI key or coding plan",
     providerType: "zai",
     providerName: "lc-zai",
+    baseUrl: ZAI_CODING_API_BASE_URL,
   },
   {
     id: "minimax",
@@ -225,6 +229,7 @@ export async function checkProviderApiKey(
   accessKey?: string,
   region?: string,
   profile?: string,
+  baseUrl?: string,
 ): Promise<void> {
   await providersRequest<{ message: string }>("POST", "/v1/providers/check", {
     provider_type: providerType,
@@ -232,6 +237,7 @@ export async function checkProviderApiKey(
     ...(accessKey && { access_key: accessKey }),
     ...(region && { region }),
     ...(profile && { profile }),
+    ...(baseUrl && { base_url: baseUrl }),
   });
 }
 
@@ -245,6 +251,7 @@ export async function createProvider(
   accessKey?: string,
   region?: string,
   profile?: string,
+  baseUrl?: string,
 ): Promise<ProviderResponse> {
   return providersRequest<ProviderResponse>("POST", "/v1/providers", {
     name: providerName,
@@ -253,6 +260,7 @@ export async function createProvider(
     ...(accessKey && { access_key: accessKey }),
     ...(region && { region }),
     ...(profile && { profile }),
+    ...(baseUrl && { base_url: baseUrl }),
   });
 }
 
@@ -265,6 +273,7 @@ export async function updateProvider(
   accessKey?: string,
   region?: string,
   profile?: string,
+  baseUrl?: string,
 ): Promise<ProviderResponse> {
   return providersRequest<ProviderResponse>(
     "PATCH",
@@ -274,6 +283,7 @@ export async function updateProvider(
       ...(accessKey && { access_key: accessKey }),
       ...(region && { region }),
       ...(profile && { profile }),
+      ...(baseUrl && { base_url: baseUrl }),
     },
   );
 }
@@ -296,11 +306,19 @@ export async function createOrUpdateProvider(
   accessKey?: string,
   region?: string,
   profile?: string,
+  baseUrl?: string,
 ): Promise<ProviderResponse> {
   const existing = await getProviderByName(providerName);
 
   if (existing) {
-    return updateProvider(existing.id, apiKey, accessKey, region, profile);
+    return updateProvider(
+      existing.id,
+      apiKey,
+      accessKey,
+      region,
+      profile,
+      baseUrl,
+    );
   }
 
   return createProvider(
@@ -310,7 +328,12 @@ export async function createOrUpdateProvider(
     accessKey,
     region,
     profile,
+    baseUrl,
   );
+}
+
+export function getProviderBaseUrl(provider: ByokProvider): string | undefined {
+  return "baseUrl" in provider ? provider.baseUrl : undefined;
 }
 
 /**

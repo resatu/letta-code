@@ -4,6 +4,7 @@
 import {
   checkProviderApiKey,
   createOrUpdateProvider,
+  getProviderBaseUrl,
   getProviderByName,
   removeProviderByName,
 } from "../../providers/byok-providers";
@@ -296,7 +297,15 @@ async function handleConnectApiKeyProvider(
   ctx.setCommandRunning(true);
 
   try {
-    await checkProviderApiKey(provider.byokProvider.providerType, apiKey);
+    const providerBaseUrl = getProviderBaseUrl(provider.byokProvider);
+    await checkProviderApiKey(
+      provider.byokProvider.providerType,
+      apiKey,
+      undefined,
+      undefined,
+      undefined,
+      providerBaseUrl,
+    );
 
     updateCommandResult(
       ctx.buffersRef,
@@ -312,6 +321,10 @@ async function handleConnectApiKeyProvider(
       provider.byokProvider.providerType,
       provider.byokProvider.providerName,
       apiKey,
+      undefined,
+      undefined,
+      undefined,
+      providerBaseUrl,
     );
 
     updateCommandResult(
@@ -406,12 +419,14 @@ async function handleConnectBedrock(
   ctx.setCommandRunning(true);
 
   try {
+    const providerBaseUrl = getProviderBaseUrl(provider.byokProvider);
     await checkProviderApiKey(
       provider.byokProvider.providerType,
       method === "iam" ? parsed.secretKey : "",
       method === "iam" ? parsed.accessKey : undefined,
       parsed.region,
       method === "profile" ? parsed.profile : undefined,
+      providerBaseUrl,
     );
 
     updateCommandResult(
@@ -431,6 +446,7 @@ async function handleConnectBedrock(
       method === "iam" ? parsed.accessKey : undefined,
       parsed.region,
       method === "profile" ? parsed.profile : undefined,
+      providerBaseUrl,
     );
 
     updateCommandResult(
